@@ -8,6 +8,10 @@
 #include <SDL.h>
 #endif
 
+#ifdef HBMK_HAS_SOKOL // HEXE_USING_SOKOL
+#include "sokol_app.h"
+#endif
+
 struct Key
 {
     ImGuiKey keysym;
@@ -92,4 +96,37 @@ static const SDL_Scancode asciiScancodeTable[] = {
     SDL_SCANCODE_LEFTBRACKET,
     SDL_SCANCODE_SLASH,
     SDL_SCANCODE_RIGHTBRACKET};
+#endif
+
+#if HBMK_HAS_SOKOL // defined(HEXE_USING_SOKOL)
+static const sapp_keycode asciiScancodeTable[] = {
+    SAPP_KEYCODE_A,
+    SAPP_KEYCODE_B,
+    SAPP_KEYCODE_C,
+    SAPP_KEYCODE_D,
+    SAPP_KEYCODE_E,
+    SAPP_KEYCODE_F,
+    SAPP_KEYCODE_G,
+    SAPP_KEYCODE_H,
+    SAPP_KEYCODE_I,
+    SAPP_KEYCODE_J,
+    SAPP_KEYCODE_K,
+    SAPP_KEYCODE_L,
+    SAPP_KEYCODE_M,
+    SAPP_KEYCODE_N,
+    SAPP_KEYCODE_O,
+    SAPP_KEYCODE_P,
+    SAPP_KEYCODE_Q,
+    SAPP_KEYCODE_R,
+    SAPP_KEYCODE_S,
+    SAPP_KEYCODE_T,
+    SAPP_KEYCODE_U,
+    SAPP_KEYCODE_V,
+    SAPP_KEYCODE_W,
+    SAPP_KEYCODE_X,
+    SAPP_KEYCODE_Y,
+    SAPP_KEYCODE_Z,
+    SAPP_KEYCODE_LEFT_BRACKET,
+    SAPP_KEYCODE_SLASH,
+    SAPP_KEYCODE_RIGHT_BRACKET};
 #endif

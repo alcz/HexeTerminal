@@ -103,22 +103,13 @@ namespace Hexe
 
         int isboxdraw(Rune);
         ushort boxdrawindex(const Glyph *);
-
-        class TerminalEmulator final
+ 
+        class TerminalEmulator
         {
         public:
             using DpyPtr = std::weak_ptr<TerminalDisplay>;
-            using PtyPtr = std::unique_ptr<IPseudoTerminal>;
-            using ProcPtr = std::unique_ptr<System::IProcess>;
 
-        private:
-            DpyPtr m_dpy;
-            PtyPtr m_pty;
-            ProcPtr m_process;
-
-            bool m_colorsLoaded;
-            int m_exitCode;
-
+        protected:
             enum
             {
                 STARTING = 0,
@@ -126,10 +117,13 @@ namespace Hexe
                 TERMINATED
             } m_status;
 
+            bool m_colorsLoaded;
+            int m_exitCode;
+            DpyPtr m_dpy;
             char m_buf[8192];
             int m_buflen;
 
-        private:
+        protected:
             Term term;
             Selection sel;
             CSIEscape csiescseq;
@@ -143,16 +137,16 @@ namespace Hexe
             int allowaltscreen;
             int allowwindowops;
 
-        private:
+        protected:
             void SetClipboard(const char *str);
 
             void LoadColors();
             int ResetColor(int x, const char *name);
 
-        private:
+        protected:
             void OnProcessExit(int exitCode);
 
-        private:
+        protected:
             void csidump();
             void csihandle();
             void csiparse();
@@ -190,7 +184,6 @@ namespace Hexe
             void tsetscroll(int, int);
             void tswapscreen();
             void tsetmode(int, int, int *, int);
-            int twrite(const char *, int, int);
             void tfulldirt();
             void tcontrolcode(uchar);
             void tdectest(char);
@@ -198,13 +191,17 @@ namespace Hexe
             int32_t tdefcolor(int *, int *, int);
             void tdeftran(char);
             void tstrsequence(uchar);
-
             void selnormalize();
             void selscroll(int, int);
             void selsnap(int *, int *, int);
+            void ttywrite(const char *, size_t, int);
 
-        private:
+        protected:
+            void ttywriteraw(const char *, size_t);
+            int twrite(const char *, int, int);
             void _die(const char *, ...);
+
+        protected:
             void drawregion(TerminalDisplay &dpy, int, int, int, int);
             void draw();
 
@@ -212,11 +209,6 @@ namespace Hexe
             void tnew(int, int);
             void tresize(int, int);
             void tsetdirtattr(int);
-
-            void ttyhangup();
-            size_t ttyread();
-            void ttywrite(const char *, size_t, int);
-            void ttywriteraw(const char *, size_t);
 
             void resettitle();
 
@@ -228,7 +220,7 @@ namespace Hexe
             int selected(int, int);
             char *getsel();
 
-        private:
+        protected:
             void xbell();
             void xclipcopy();
 
@@ -241,8 +233,8 @@ namespace Hexe
             void xsetsel(char *);
             void xximspot(int, int);
 
-        private:
-            TerminalEmulator(PtyPtr &&pty, ProcPtr &&process, const std::shared_ptr<TerminalDisplay> &display);
+        protected:
+            TerminalEmulator(const std::shared_ptr<TerminalDisplay> &display);
 
         public:
             ~TerminalEmulator();
@@ -250,9 +242,6 @@ namespace Hexe
             TerminalEmulator(TerminalEmulator &&) = delete;
             TerminalEmulator &operator=(const TerminalEmulator &) = delete;
             TerminalEmulator &operator=(TerminalEmulator &&) = delete;
-
-        public:
-            static std::unique_ptr<TerminalEmulator> Create(PtyPtr &&pty, ProcPtr &&process, const std::shared_ptr<TerminalDisplay> &display);
 
         public:
             void Resize(int columns, int rows);
@@ -269,13 +258,42 @@ namespace Hexe
             inline uint32_t GetDefaultReverseCursorColor() const { return defaultrcs; }
             inline int GetNumColumns() const { return term.col; }
             inline int GetNumRows() const { return term.row; }
-            inline int Write(const char *buf, size_t buflen) { return m_pty->Write(buf, (int)buflen); }
 
         public:
             void printscreen(const Arg *);
             void printsel(const Arg *);
             void sendbreak(const Arg *);
             void toggleprinter(const Arg *);
+        };
+
+        class TerminalEmulatorPty : public TerminalEmulator
+        {
+        public:
+            using PtyPtr = std::unique_ptr<IPseudoTerminal>;
+            using ProcPtr = std::unique_ptr<System::IProcess>;
+
+        private:
+            PtyPtr m_pty;
+            ProcPtr m_process;
+
+            size_t ttyread();
+            void ttywriteraw(const char *, size_t);
+
+            void ttyhangup();
+
+        private:
+            TerminalEmulatorPty(PtyPtr &&pty, ProcPtr &&process, const std::shared_ptr<TerminalDisplay> &display);
+
+        public:
+            ~TerminalEmulatorPty();
+            static std::unique_ptr<TerminalEmulatorPty> Create(PtyPtr &&pty, ProcPtr &&process, const std::shared_ptr<TerminalDisplay> &display);
+
+        public:
+            void Update();
+            void Terminate();
+            void Resize(int columns, int rows);
+            size_t Feed(const char *s, size_t n);
+            inline int Write(const char *buf, size_t buflen) { return m_pty->Write(buf, (int)buflen); }
         };
 
     } // namespace Terminal

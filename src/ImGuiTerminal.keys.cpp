@@ -231,6 +231,7 @@ static Key platformKeys[] = {
     {SDL_SCANCODE_KP_8, ImGuiKeyModFlags_Any, "\033Ox", +2, 0},
     {SDL_SCANCODE_KP_9, ImGuiKeyModFlags_Any, "\033Oy", +2, 0}
 #endif
+
 };
 
 ImGuiKeyMap ImGuiTerminalKeyMap{keys, (sizeof(keys) / sizeof(keys[0])), platformKeys, (sizeof(platformKeys) / sizeof(platformKeys[0])), shortcuts, (sizeof(shortcuts) / sizeof(shortcuts[0]))};

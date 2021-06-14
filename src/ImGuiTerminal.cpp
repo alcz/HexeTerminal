@@ -22,8 +22,6 @@
 
 #include "Hexe/Terminal/ImGuiTerminal.h"
 #include "Hexe/Terminal/Boxdraw.h"
-#include "Hexe/System/Process.h"
-#include "Hexe/System/ProcessFactory.h"
 //#include "Macros.h"
 #include "ImGuiTerminal.colors.h"
 #include "ImGuiTerminal.keys.h"
@@ -1116,6 +1114,10 @@ std::shared_ptr<ImGuiTerminal> ImGuiTerminal::Create(std::shared_ptr<Hexe::Termi
     return terminal;
 }
 
+/* -- move to subclass ImGuiTerminalPlatform
+#include "Hexe/System/Process.h"
+#include "Hexe/System/ProcessFactory.h"
+
 static Hexe::System::IProcessFactory *g_processFactory = new Hexe::System::ProcessFactory();
 
 std::shared_ptr<ImGuiTerminal> ImGuiTerminal::Create(int columns, int rows, const std::string &program, const ImVector<std::string> &args, const std::string &workingDir, uint32_t options, System::IProcessFactory *processFactory)
@@ -1150,6 +1152,7 @@ std::shared_ptr<ImGuiTerminal> ImGuiTerminal::Create(int columns, int rows, cons
     terminal->m_terminal = TerminalEmulator::Create(std::move(pseudoTerminal), std::move(process), terminal);
     return terminal;
 }
+*/
 
 #ifdef _MSC_VER
 #pragma warning(pop)

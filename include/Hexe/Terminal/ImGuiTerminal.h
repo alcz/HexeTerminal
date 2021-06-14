@@ -21,9 +21,9 @@
 //  DEALINGS IN THE SOFTWARE.
 #pragma once
 
-#include "Hexe/Terminal/TerminalDisplay.h"
-#include "Hexe/Terminal/TerminalEmulator.h"
-#include "Hexe/System/IProcessFactory.h"
+#include "TerminalDisplay.h"
+#include "TerminalEmulator.h"
+#include "../System/IProcessFactory.h"
 #include <memory>
 #include <string>
 #include <utility>
@@ -124,7 +124,7 @@ namespace Hexe
             void Draw(const ImVec4 &contentArea, float scale = 1.0f);
 
             static std::shared_ptr<ImGuiTerminal> Create(std::shared_ptr<Hexe::Terminal::TerminalEmulator> &&terminalEmulator, ImGuiTerminalConfig *config = 0);
-            static std::shared_ptr<ImGuiTerminal> Create(int columns, int rows, const std::string &program, const ImVector<std::string> &args, const std::string &workingDir, uint32_t options = 0, System::IProcessFactory *processFactory = nullptr);
+//            static std::shared_ptr<ImGuiTerminal> Create(int columns, int rows, const std::string &program, const ImVector<std::string> &args, const std::string &workingDir, uint32_t options = 0, System::IProcessFactory *processFactory = nullptr);
         };
     } // namespace Terminal
 } // namespace Hexe

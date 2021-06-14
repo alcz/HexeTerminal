@@ -515,7 +515,7 @@ TerminalEmulator::getsel(void)
     ptr = str = (char *)xmalloc(bufsize);
 
     /* append every set & selected glyph to the selection */
-    for (y = sel.nb.y; y <= sel.ne.y; y++)
+    for (y = sel.nb.y; y <= sel.ne.y && y <= term.row; y++)
     {
         if ((linelen = tlinelen(y)) == 0)
         {
@@ -585,7 +585,7 @@ void TerminalEmulator::_die(const char *errstr, ...)
 }
 
 size_t
-TerminalEmulator::ttyread(void)
+TerminalEmulatorPty::ttyread(void)
 {
     int ret, written;
 
@@ -612,7 +612,7 @@ TerminalEmulator::ttyread(void)
     return 0;
 }
 
-void TerminalEmulator::ttywrite(const char *s, size_t n, int may_echo)
+void TerminalEmulatorPty::ttywrite(const char *s, size_t n, int may_echo)
 {
     const char *next;
 
@@ -644,7 +644,7 @@ void TerminalEmulator::ttywrite(const char *s, size_t n, int may_echo)
     }
 }
 
-void TerminalEmulator::ttywriteraw(const char *s, size_t n)
+void TerminalEmulatorPty::ttywriteraw(const char *s, size_t n)
 {
     if (m_pty->Write(s, n) < n)
     {
@@ -652,7 +652,7 @@ void TerminalEmulator::ttywriteraw(const char *s, size_t n)
     }
 }
 
-void TerminalEmulator::ttyhangup()
+void TerminalEmulatorPty::ttyhangup()
 {
     if (m_process)
         m_process->Terminate();
@@ -2527,7 +2527,7 @@ std::unique_ptr<TerminalEmulator> TerminalEmulator::Create(PtyPtr &&pty, ProcPtr
     return std::unique_ptr<TerminalEmulator>(new TerminalEmulator(std::move(pty), std::move(process), display));
 }
 
-TerminalEmulator::TerminalEmulator(PtyPtr &&pty, ProcPtr &&process, const std::shared_ptr<TerminalDisplay> &display)
+TerminalEmulatorPty::TerminalEmulatorPty(PtyPtr &&pty, ProcPtr &&process, const std::shared_ptr<TerminalDisplay> &display)
     : m_dpy(display), m_pty(std::move(pty)), m_process(std::move(process)), m_colorsLoaded(false), m_exitCode(1), m_status(STARTING), m_buflen(0), defaultfg(7), defaultbg(0), defaultcs(7), defaultrcs(0), allowaltscreen(1), allowwindowops(1)
 {
     memset(m_buf, 0, sizeof(m_buf));
@@ -2615,13 +2615,19 @@ int TerminalEmulator::GetExitCode() const
     return m_exitCode;
 }
 
-void TerminalEmulator::Resize(int columns, int rows)
+void TerminalEmulatorPty::Resize(int columns, int rows)
 {
     if (!m_pty->Resize(columns, rows))
     {
         _die("Failed to resize pty!");
         return;
     }
+    tresize(columns, rows);
+    Redraw();
+}
+
+void TerminalEmulator::Resize(int columns, int rows)
+{
     tresize(columns, rows);
     Redraw();
 }
